@@ -125,23 +125,28 @@ export async function addBook(data) {
       userId,
       grade: data.rating ? parseInt(data.rating, 10) : 0,
     }],
-    averageRating: parseInt(data.rating, 10),
+    averageRating: data.rating ? parseInt(data.rating, 10) : 0,
   };
+
   const bodyFormData = new FormData();
   bodyFormData.append('book', JSON.stringify(book));
-  bodyFormData.append('image', data.file[0]);
+  if (data.file && data.file.length > 0) {
+    bodyFormData.append('image', data.file[0]);
+  }
 
   try {
-    return await axios({
+    const response = await axios({
       method: 'post',
       url: `${API_ROUTES.BOOKS}`,
       data: bodyFormData,
       headers: {
+        'Content-Type': 'multipart/form-data',
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
     });
+    return response.data;
   } catch (err) {
-    console.error(err);
+    console.error('Error adding book:', err);
     return { error: true, message: err.message };
   }
 }
