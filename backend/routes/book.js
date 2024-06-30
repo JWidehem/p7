@@ -1,10 +1,9 @@
-/* eslint-disable no-underscore-dangle */
 const express = require('express');
-
-const router = express.Router();
 const multer = require('multer');
 const Book = require('../models/book');
 const auth = require('../middleware/auth');
+
+const router = express.Router();
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -29,7 +28,8 @@ router.post('/', auth, upload.single('image'), (req, res) => {
       imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
     });
 
-    book.save()
+    book
+      .save()
       .then(() => {
         res.status(201).json({ message: 'Book created!' });
       })
@@ -58,9 +58,15 @@ router.get('/:id', (req, res) => {
 // Route pour mettre à jour un livre
 router.put('/:id', auth, upload.single('image'), (req, res) => {
   const bookObject = req.file
-    ? { ...JSON.parse(req.body.book), imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}` }
+    ? {
+        ...JSON.parse(req.body.book),
+        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
+      }
     : { ...req.body };
-  Book.updateOne({ _id: req.params.id, userId: req.auth.userId }, { ...bookObject, _id: req.params.id })
+  Book.updateOne(
+    { _id: req.params.id, userId: req.auth.userId },
+    { ...bookObject, _id: req.params.id },
+  )
     .then(() => res.status(200).json({ message: 'Book updated!' }))
     .catch((error) => res.status(400).json({ error }));
 });
@@ -75,8 +81,8 @@ router.delete('/:id', auth, (req, res) => {
 // Route pour obtenir les livres les mieux notés
 router.get('/bestrating', (req, res) => {
   Book.find()
-    .sort({ averageRating: -1 }) // Tri par moyenne des notes décroissantes
-    .limit(5) // Limite à 5 résultats, ajustez selon vos besoins
+    .sort({ averageRating: -1 })
+    .limit(3)
     .then((books) => res.status(200).json(books))
     .catch((error) => res.status(400).json({ error }));
 });
@@ -100,10 +106,14 @@ router.post('/:id/rating', auth, (req, res) => {
 
       // Calculer la nouvelle moyenne des notations
       const totalRatings = updatedRatings.length;
-      const sumRatings = updatedRatings.reduce((acc, curr) => acc + curr.grade, 0);
+      const sumRatings = updatedRatings.reduce(
+        (acc, curr) => acc + curr.grade,
+        0,
+      );
       const averageRating = sumRatings / totalRatings;
 
-      // Créer un nouvel objet book avec les propriétés mises à jour
+      // Désactiver ESLint pour cette ligne spécifique
+      // eslint-disable-next-line no-underscore-dangle
       const updatedBook = {
         ...book._doc,
         ratings: updatedRatings,
@@ -116,36 +126,6 @@ router.post('/:id/rating', auth, (req, res) => {
         .catch((error) => res.status(400).json({ error }));
     })
     .catch((error) => res.status(500).json({ error }));
-});
-
-// Route pour noter un livre
-router.post('/:id/rating', auth, (req, res) => {
-  const { userId, rating } = req.body;
-
-  Book.findOne({ _id: req.params.id })
-    .then((book) => {
-      if (!book) {
-        return res.status(404).json({ message: 'Livre non trouvé' });
-      }
-
-      // Ajouter ou mettre à jour la note de l'utilisateur pour ce livre
-      const existingRatingIndex = book.ratings.findIndex((r) => r.userId === userId);
-      const updatedBook = { ...book._doc };
-
-      if (existingRatingIndex !== -1) {
-        updatedBook.ratings[existingRatingIndex].grade = rating;
-      } else {
-        updatedBook.ratings.push({ userId, grade: rating });
-      }
-
-      // Calculer la moyenne des notes
-      const totalRatings = updatedBook.ratings.reduce((acc, curr) => acc + curr.grade, 0);
-      updatedBook.averageRating = totalRatings / updatedBook.ratings.length;
-
-      return Book.updateOne({ _id: req.params.id }, updatedBook)
-        .then(() => res.status(200).json(updatedBook));
-    })
-    .catch((error) => res.status(400).json({ error }));
 });
 
 module.exports = router;

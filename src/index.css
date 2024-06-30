@@ -3,19 +3,87 @@
    License: none (public domain)
 */
 
-html, body, div, span, applet, object, iframe,
-h1, h2, h3, h4, h5, h6, p, blockquote, pre,
-a, abbr, acronym, address, big, cite, code,
-del, dfn, em, img, ins, kbd, q, s, samp,
-small, strike, strong, sub, sup, tt, var,
-b, u, i, center,
-dl, dt, dd, ol, ul, li,
-fieldset, form, label, legend,
-table, caption, tbody, tfoot, thead, tr, th, td,
-article, aside, canvas, details, embed,
-figure, figcaption, footer, header, hgroup,
-menu, nav, output, ruby, section, summary,
-time, mark, audio, video {
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
   margin: 0;
   padding: 0;
   border: 0;
@@ -24,21 +92,34 @@ time, mark, audio, video {
   vertical-align: baseline;
 }
 /* HTML5 display-role reset for older browsers */
-article, aside, details, figcaption, figure,
-footer, header, hgroup, menu, nav, section {
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
   display: block;
 }
 body {
   line-height: 1;
 }
-ol, ul {
+ol,
+ul {
   list-style: none;
 }
-blockquote, q {
+blockquote,
+q {
   quotes: none;
 }
-blockquote:before, blockquote:after,
-q:before, q:after {
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
   content: none;
 }
 table {
@@ -50,7 +131,7 @@ body {
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #F2E3CE;
+  background-color: #f2e3ce;
 }
 
 code {
@@ -67,8 +148,7 @@ code {
 .container {
   width: 100%;
   max-width: 1440px;
-  margin:auto;
-
+  margin: auto;
 }
 
 .content-container {
@@ -76,28 +156,28 @@ code {
   max-width: 1320px;
   margin: auto;
   padding-block: 5em;
-
 }
 
 .backArrow {
   display: block;
   margin-bottom: 5em;
   color: #796157;
-  font-family: "DM Sans", sans-serif;
+  font-family: 'DM Sans', sans-serif;
 
   text-decoration: none;
 }
 
 h1 {
-  font-family: "Libre Baskerville", serif;
+  font-family: 'Libre Baskerville', serif;
   font-size: 44px;
   font-style: italic;
   color: #796157;
 }
 
-button, .button {
-  color: #2C1810;
-  background-color: #D9A963;
+button,
+.button {
+  color: #2c1810;
+  background-color: #d9a963;
   text-decoration: none;
   padding: 20px;
   border-radius: 5px;
@@ -106,9 +186,10 @@ button, .button {
   transition: 0.5s;
 }
 
-button:hover, .button:hover {
+button:hover,
+.button:hover {
   text-decoration: none;
-  background-color: #B99056;
+  background-color: #b99056;
   color: #fff;
   transition: 0.5s;
 }

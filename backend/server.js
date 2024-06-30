@@ -21,7 +21,11 @@ if (!fs.existsSync(imagesDir)) {
 // eslint-disable-next-line no-console
 console.log('MONGO_URI from .env:', process.env.MONGO_URI);
 
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
     // eslint-disable-next-line no-console
     console.log('MongoDB connected');
