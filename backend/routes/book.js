@@ -6,6 +6,7 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
+// Configuration de Multer pour le stockage des images
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'images');

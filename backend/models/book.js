@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+// Définition du schéma de livre
 const bookSchema = new mongoose.Schema({
   userId: { type: String, required: true },
   title: { type: String, required: true },
@@ -16,4 +17,5 @@ const bookSchema = new mongoose.Schema({
   averageRating: { type: Number, default: 0 },
 });
 
+// Exportation du modèle Book basé sur le schéma
 module.exports = mongoose.model('Book', bookSchema);
