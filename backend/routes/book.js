@@ -1,22 +1,15 @@
 /* eslint-disable consistent-return */
 const express = require('express');
 const multer = require('multer');
+const sharp = require('sharp');
+const path = require('path');
 const Book = require('../models/book');
 const auth = require('../middleware/auth');
 
 const router = express.Router();
 
-// Configuration de Multer pour le stockage des images
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'images');
-  },
-  filename: (req, file, cb) => {
-    const name = file.originalname.split(' ').join('_');
-    cb(null, `${name}-${Date.now()}`);
-  },
-});
-
+// Configuration de Multer pour le stockage en mémoire
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 // Route pour obtenir les livres les mieux notés
@@ -29,14 +22,24 @@ router.get('/bestrating', (req, res) => {
 });
 
 // Route pour créer un livre
-router.post('/', auth, upload.single('image'), (req, res) => {
+router.post('/', auth, upload.single('image'), async (req, res) => {
   try {
     const bookObject = JSON.parse(req.body.book);
+
+    const fileName = `${req.file.originalname.split(' ').join('_')}-${Date.now()}.jpeg`;
+    const outputPath = path.join('images', fileName);
+
+    // Optimiser l'image téléchargée et la stocker dans le répertoire 'images'
+    await sharp(req.file.buffer)
+      .resize(206, 260)
+      .toFormat('jpeg')
+      .jpeg({ quality: 80 })
+      .toFile(outputPath);
 
     const book = new Book({
       ...bookObject,
       userId: req.auth.userId,
-      imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
+      imageUrl: `${req.protocol}://${req.get('host')}/images/${fileName}`,
     });
 
     book
@@ -67,19 +70,38 @@ router.get('/:id', (req, res) => {
 });
 
 // Route pour mettre à jour un livre
-router.put('/:id', auth, upload.single('image'), (req, res) => {
-  const bookObject = req.file
-    ? {
-        ...JSON.parse(req.body.book),
-        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
-      }
-    : { ...req.body };
-  Book.updateOne(
-    { _id: req.params.id, userId: req.auth.userId },
-    { ...bookObject, _id: req.params.id },
-  )
-    .then(() => res.status(200).json({ message: 'Book updated!' }))
-    .catch((error) => res.status(400).json({ error }));
+router.put('/:id', auth, upload.single('image'), async (req, res) => {
+  try {
+    const bookObject = req.file
+      ? {
+          ...JSON.parse(req.body.book),
+          imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.originalname.split(' ').join('_')}-${Date.now()}.jpeg`,
+        }
+      : { ...req.body };
+
+    if (req.file) {
+      const fileName = `${req.file.originalname.split(' ').join('_')}-${Date.now()}.jpeg`;
+      const outputPath = path.join('images', fileName);
+
+      // Optimiser l'image téléchargée et la stocker dans le répertoire 'images'
+      await sharp(req.file.buffer)
+        .resize(206, 260)
+        .toFormat('jpeg')
+        .jpeg({ quality: 80 })
+        .toFile(outputPath);
+
+      bookObject.imageUrl = `${req.protocol}://${req.get('host')}/images/${fileName}`;
+    }
+
+    Book.updateOne(
+      { _id: req.params.id, userId: req.auth.userId },
+      { ...bookObject, _id: req.params.id },
+    )
+      .then(() => res.status(200).json({ message: 'Book updated!' }))
+      .catch((error) => res.status(400).json({ error }));
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // Route pour supprimer un livre
