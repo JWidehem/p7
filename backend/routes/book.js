@@ -17,6 +17,15 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+// Route pour obtenir les livres les mieux notés
+router.get('/bestrating', (req, res) => {
+  Book.find()
+    .sort({ averageRating: -1 })
+    .limit(3)
+    .then((books) => res.status(200).json(books))
+    .catch((error) => res.status(400).json({ error }));
+});
+
 // Route pour créer un livre
 router.post('/', auth, upload.single('image'), (req, res) => {
   try {
@@ -75,15 +84,6 @@ router.put('/:id', auth, upload.single('image'), (req, res) => {
 router.delete('/:id', auth, (req, res) => {
   Book.deleteOne({ _id: req.params.id, userId: req.auth.userId })
     .then(() => res.status(200).json({ message: 'Book deleted!' }))
-    .catch((error) => res.status(400).json({ error }));
-});
-
-// Route pour obtenir les livres les mieux notés
-router.get('/bestrating', (req, res) => {
-  Book.find()
-    .sort({ averageRating: -1 })
-    .limit(3)
-    .then((books) => res.status(200).json(books))
     .catch((error) => res.status(400).json({ error }));
 });
 
