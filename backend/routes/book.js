@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 const express = require('express');
 const multer = require('multer');
 const Book = require('../models/book');
@@ -90,10 +91,26 @@ router.delete('/:id', auth, (req, res) => {
 // Route pour ajouter une notation à un livre
 router.post('/:id/rating', auth, (req, res) => {
   const { rating } = req.body;
+
+  // Vérifier si la notation est valide (entre 0 et 5)
+  if (rating < 0 || rating > 5) {
+    return res.status(400).json({ error: 'Rating must be between 0 and 5' });
+  }
+
   Book.findOne({ _id: req.params.id })
     .then((book) => {
       if (!book) {
         return res.status(404).json({ error: 'Book not found!' });
+      }
+
+      // Vérifier si l'utilisateur a déjà noté ce livre
+      const existingRating = book.ratings.find(
+        (r) => r.userId === req.auth.userId,
+      );
+      if (existingRating) {
+        return res
+          .status(400)
+          .json({ error: 'User has already rated this book!' });
       }
 
       const newRating = {
@@ -104,20 +121,19 @@ router.post('/:id/rating', auth, (req, res) => {
       // Ajouter la nouvelle notation
       const updatedRatings = [...book.ratings, newRating];
 
-      // Calculer la nouvelle moyenne des notations
+      // Calculer la nouvelle moyenne des notations et arrondir à un chiffre après la virgule
       const totalRatings = updatedRatings.length;
       const sumRatings = updatedRatings.reduce(
         (acc, curr) => acc + curr.grade,
         0,
       );
-      const averageRating = sumRatings / totalRatings;
+      const averageRating = (sumRatings / totalRatings).toFixed(1);
 
-      // Désactiver ESLint pour cette ligne spécifique
-      // eslint-disable-next-line no-underscore-dangle
+      // Mettre à jour le livre avec les nouvelles notations et la nouvelle moyenne
       const updatedBook = {
         ...book._doc,
         ratings: updatedRatings,
-        averageRating,
+        averageRating: parseFloat(averageRating), // Convertir en nombre
       };
 
       // Sauvegarder les modifications
