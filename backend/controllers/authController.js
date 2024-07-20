@@ -5,17 +5,26 @@ const User = require('../models/user');
 const { handleError } = require('../utils/errorUtils');
 
 exports.signup = (req, res) => {
-  bcrypt
-    .hash(req.body.password, 10)
-    .then((hash) => {
-      const user = new User({
-        email: req.body.email,
-        password: hash,
-      });
-      user
-        .save()
-        .then(() => res.status(201).json({ message: 'User created!' }))
-        .catch((error) => handleError(res, error, 'User creation failed', 400));
+  User.findOne({ email: req.body.email })
+    .then((existingUser) => {
+      if (existingUser) {
+        return res.status(400).json({ error: 'User already exists!' });
+      }
+      bcrypt
+        .hash(req.body.password, 10)
+        .then((hash) => {
+          const user = new User({
+            email: req.body.email,
+            password: hash,
+          });
+          user
+            .save()
+            .then(() => res.status(201).json({ message: 'User created!' }))
+            .catch((error) =>
+              handleError(res, error, 'User creation failed', 400),
+            );
+        })
+        .catch((error) => handleError(res, error));
     })
     .catch((error) => handleError(res, error));
 };
